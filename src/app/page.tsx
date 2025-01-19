@@ -1,6 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, FormEvent } from 'react';
+
+interface GenerateResponse {
+  names: string[];
+  success: boolean;
+  error?: string;
+}
 
 export default function Home() {
   const [keywords, setKeywords] = useState('');
@@ -8,7 +14,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
@@ -23,7 +29,7 @@ export default function Home() {
         body: JSON.stringify({ keywords }),
       });
       
-      const data = await response.json();
+      const data = await response.json() as GenerateResponse;
       
       if (!response.ok) {
         throw new Error(data.error || 'Failed to generate business names');
@@ -34,9 +40,10 @@ export default function Home() {
       }
       
       setBusinessNames(data.names);
-    } catch (err: any) {
-      setError(err.message || 'Something went wrong');
-      console.error('Error:', err);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Something went wrong';
+      setError(errorMessage);
+      console.error('Error:', error);
     } finally {
       setIsLoading(false);
     }
