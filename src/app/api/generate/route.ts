@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
 
-const LAMBDA_URL = 'https://wkra32vijugq6i3asctft2qqrm0ujntl.lambda-url.us-east-1.on.aws/';
+if (!process.env.LAMBDA_URL) {
+  throw new Error('LAMBDA_URL environment variable is not set');
+}
+
+const LAMBDA_URL = process.env.LAMBDA_URL;
 
 interface LambdaResponse {
   generated_text: string;
@@ -34,15 +38,25 @@ export async function POST(request: Request) {
     const truncatedKeywords = keywords.slice(0, 100);
 
     // Create a prompt that will generate business names
-    const prompt = `Act as a creative business naming expert. Generate 6 unique and memorable business names based on these keywords: "${truncatedKeywords}".
+    const prompt = `Act as a modern branding expert specializing in viral, trending business names. Generate 6 catchy and contemporary business names based on these keywords: "${truncatedKeywords}".
 
-Follow these guidelines:
-1. Create names that are distinctive and stand out in the market
-2. Use creative wordplay, alliteration, or clever combinations
-3. Consider modern naming trends but avoid being too trendy
-4. Make names easy to spell and remember
-5. Each name should be 1-3 words maximum
-6. Avoid generic or overused terms
+Follow these trendy naming patterns:
+1. Use modern prefixes/suffixes: -ly, -ify, -io, -ai, -tech, -labs
+2. Consider popular trends:
+   - AI/Tech-inspired names (e.g., using 'AI', 'Tech', 'Smart')
+   - Web3/Crypto-style names (removing vowels, using 'X', 'Z')
+   - Minimalist single words
+   - Compound words (combining two relevant terms)
+3. Make it social media friendly:
+   - Easy to hashtag
+   - Short enough for handles
+   - Memorable for viral potential
+4. Use these techniques:
+   - Intentional misspellings (e.g., Lyft, Fiverr)
+   - Letter substitutions (e.g., using 'Z' instead of 'S')
+   - Blended words (e.g., Instagram = Instant + Telegram)
+5. Keep names under 12 characters when possible
+6. Make it easy to pronounce at first glance
 
 Format the response as a JSON object like this: { rows: [ { names: 'business name' } ] }
 Only respond with the JSON, no additional text or explanations.`;
