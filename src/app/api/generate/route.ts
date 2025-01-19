@@ -1,10 +1,6 @@
 import { NextResponse } from 'next/server';
 
-if (!process.env.LAMBDA_URL) {
-  throw new Error('LAMBDA_URL environment variable is not set');
-}
-
-const LAMBDA_URL = process.env.LAMBDA_URL;
+const LAMBDA_URL = 'https://wkra32vijugq6i3asctft2qqrm0ujntl.lambda-url.us-east-1.on.aws/';
 
 interface LambdaResponse {
   generated_text: string;
