@@ -40,6 +40,8 @@ export async function POST(request: Request) {
         success: true
       });
     } catch (whoisError) {
+      console.log('Error checking domain with whoiser:', whoisError);
+      
       // If whoiser throws an error, it likely means the domain is available
       return NextResponse.json({
         domain,
