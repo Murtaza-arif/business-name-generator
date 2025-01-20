@@ -8,11 +8,43 @@ interface GenerateResponse {
   error?: string;
 }
 
+interface DomainCheckResponse {
+  domain: string;
+  available: boolean;
+  success: boolean;
+  error?: string;
+}
+
 export default function Home() {
   const [keywords, setKeywords] = useState('');
-  const [businessNames, setBusinessNames] = useState<string[]>([]);
+  const [businessNames, setBusinessNames] = useState<Array<{name: string; domainStatus?: {available: boolean; checking: boolean}}>>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const checkDomainAvailability = async (name: string) => {
+    const domainName = name.toLowerCase().replace(/[^a-z0-9]/g, '') + '.com';
+    
+    try {
+      const response = await fetch('/api/check-domain', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ domain: domainName }),
+      });
+      
+      const data = await response.json() as DomainCheckResponse;
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to check domain');
+      }
+      
+      return data.available;
+    } catch (error) {
+      console.error('Error checking domain:', error);
+      return null;
+    }
+  };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -39,7 +71,12 @@ export default function Home() {
         throw new Error('Invalid response from server');
       }
       
-      setBusinessNames(data.names);
+      const namesWithDomainStatus = await Promise.all(data.names.map(async (name) => {
+        const domainStatus = { available: await checkDomainAvailability(name), checking: false };
+        return { name, domainStatus };
+      }));
+      
+      setBusinessNames(namesWithDomainStatus);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Something went wrong';
       setError(errorMessage);
@@ -95,7 +132,16 @@ export default function Home() {
                 key={index}
                 className="p-4 rounded-lg shadow-md border border-gray-100 hover:shadow-lg transition-shadow"
               >
-                <div className="font-semibold">{name}</div>
+                <div className="font-semibold">{name.name}</div>
+                {name.domainStatus && (
+                  <div className="text-sm mt-2">
+                    {name.domainStatus.available ? (
+                      <span className="text-green-600">Domain Available</span>
+                    ) : (
+                      <span className="text-red-600">Domain Not Available</span>
+                    )}
+                  </div>
+                )}
               </div>
             ))}
           </div>
