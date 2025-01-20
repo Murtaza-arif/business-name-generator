@@ -18,11 +18,25 @@ export async function POST(request: Request) {
 
     try {
       const whoisData = await whoiser(domain);      
-      const isAvailable = !whoisData?.domain?.domainName;
+      const verisignData = whoisData['whois.verisign-grs.com'];
+      
+      if (verisignData && typeof verisignData === 'object' && 'Domain Status' in verisignData) {
+        const domainStatus = Array.isArray(verisignData['Domain Status']) 
+          ? verisignData['Domain Status']
+          : [];
+        const isAvailable = domainStatus.length === 0;
 
+        return NextResponse.json({
+          domain,
+          available: isAvailable,
+          success: true
+        });
+      }
+
+      // If we don't get expected data structure, assume domain might be available
       return NextResponse.json({
         domain,
-        available: isAvailable,
+        available: true,
         success: true
       });
     } catch (whoisError) {

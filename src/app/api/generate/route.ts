@@ -82,10 +82,8 @@ Only respond with the JSON, no additional text or explanations.`;
 
     try {
       const parsedData = JSON.parse(data.generated_text.trim().toLowerCase()) as ParsedResponse;
-      console.log(parsedData);
       
       const names = parsedData.rows.map((row: RowType) => {
-        console.log(row, typeof row);
         if (typeof row === 'string') {
           return row.trim();
         }

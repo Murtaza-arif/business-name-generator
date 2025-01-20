@@ -17,7 +17,7 @@ interface DomainCheckResponse {
 
 export default function Home() {
   const [keywords, setKeywords] = useState('');
-  const [businessNames, setBusinessNames] = useState<Array<{name: string; domainStatus?: {available: boolean; checking: boolean}}>>([]);
+  const [businessNames, setBusinessNames] = useState<Array<{name: string; domainStatus?: {available: boolean | null; checking: boolean}}>>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -135,11 +135,14 @@ export default function Home() {
                 <div className="font-semibold">{name.name}</div>
                 {name.domainStatus && (
                   <div className="text-sm mt-2">
-                    {name.domainStatus.available ? (
-                      <span className="text-green-600">Domain Available</span>
-                    ) : (
-                      <span className="text-red-600">Domain Not Available</span>
-                    )}
+                    <a
+                      href={`https://www.namecheap.com/domains/registration/results/?domain=${name.name.toLowerCase().replace(/[^a-z0-9]/g, '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`underline hover:underline ${name.domainStatus.available === true ? 'text-green-600 hover:text-green-800' : 'text-red-600 hover:text-red-800'}`}
+                    >
+                      {name.domainStatus.available === true ? 'Domain Available' : name.domainStatus.available === false ? 'Domain Not Available' : 'Domain Status Unknown'}
+                    </a>
                   </div>
                 )}
               </div>
